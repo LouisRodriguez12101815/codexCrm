@@ -28,7 +28,7 @@ export async function setSession() {
   (await cookies()).set(COOKIE, sessionSecret(), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.COOKIE_SECURE === 'true' || process.env.APP_BASE_URL?.startsWith('https://') === true,
     path: '/',
   });
 }
