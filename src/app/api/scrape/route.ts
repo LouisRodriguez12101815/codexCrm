@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server';import { ensureSchema,q } from '@/lib/db';import { requireAuth } from '@/lib/auth';import { runScrape } from '@/lib/scraper';
+export async function POST(req:Request){ await requireAuth(); await ensureSchema(); try{ await runScrape(25); }catch(e:any){ await q('INSERT INTO scrape_runs(source,status,error) VALUES($1,$2,$3)',['florida-fdacs-seller-of-travel','failed',e.message]); } return NextResponse.redirect(new URL('/leads',req.url)); }

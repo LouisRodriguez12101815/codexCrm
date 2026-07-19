@@ -1,0 +1,2 @@
+import { redirect } from 'next/navigation';import { isAuthed } from '@/lib/auth';
+export default async function Home(){ if(await isAuthed()) redirect('/leads'); return <main className="wrap"><div className="card"><h1>CodexCRM</h1><p className="muted">Minimal AWS-owned SDR CRM demo.</p><form method="post" action="/api/auth/login" className="grid"><input name="email" placeholder="demo@codexcrm.local"/><input name="password" type="password" placeholder="codexcrm-demo"/><button>Log in</button></form></div></main>}
