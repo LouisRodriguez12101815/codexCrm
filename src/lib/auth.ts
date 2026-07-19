@@ -1,6 +1,38 @@
 import { cookies } from 'next/headers';
-const COOKIE='codexcrm_session';
-export async function isAuthed(){ return (await cookies()).get(COOKIE)?.value === process.env.DEMO_SESSION_SECRET; }
-export async function requireAuth(){ if(!(await isAuthed())) throw new Error('Unauthorized'); }
-export async function setSession(){ (await cookies()).set(COOKIE, process.env.DEMO_SESSION_SECRET || 'dev-secret', { httpOnly:true, sameSite:'lax', secure:process.env.NODE_ENV==='production', path:'/' }); }
-export async function clearSession(){ (await cookies()).delete(COOKIE); }
+import { redirect } from 'next/navigation';
+
+const COOKIE = 'codexcrm_session';
+const PLACEHOLDER_SECRETS = new Set(['', 'dev-secret', 'change-me', 'changeme', 'placeholder']);
+
+function sessionSecret() {
+  const secret = process.env.DEMO_SESSION_SECRET?.trim() || '';
+
+  if (process.env.NODE_ENV === 'production' && PLACEHOLDER_SECRETS.has(secret)) {
+    throw new Error('DEMO_SESSION_SECRET must be set to a strong, non-placeholder value in production.');
+  }
+
+  return secret || 'dev-secret';
+}
+
+export async function isAuthed() {
+  return (await cookies()).get(COOKIE)?.value === sessionSecret();
+}
+
+export async function requireAuth() {
+  if (!(await isAuthed())) {
+    redirect('/');
+  }
+}
+
+export async function setSession() {
+  (await cookies()).set(COOKIE, sessionSecret(), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  });
+}
+
+export async function clearSession() {
+  (await cookies()).delete(COOKIE);
+}
