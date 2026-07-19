@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { ensureSchema, q } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
-import { checkCooldown, isUsNumber, stamp } from '@/lib/twilioGuard';
+import { checkCooldown, friendlyTwilioError, isUsNumber, stamp } from '@/lib/twilioGuard';
 
 export async function POST(req: Request) {
   await requireAuth();
@@ -26,16 +26,21 @@ export async function POST(req: Request) {
     if (cooldownRemaining) {
       reason = `Call rate limit active; retry in ${cooldownRemaining}`;
     } else {
-      const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-      const call = await client.calls.create({
-        from: process.env.TWILIO_FROM_NUMBER!,
-        to,
-        twiml: '<Response><Say>This is a CodexCRM demo call. Goodbye.</Say></Response>',
-      });
+      try {
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        const call = await client.calls.create({
+          from: process.env.TWILIO_FROM_NUMBER!,
+          to,
+          twiml: '<Response><Say>This is a CodexCRM demo call. Goodbye.</Say></Response>',
+        });
 
-      sid = call.sid;
-      status = call.status;
-      await stamp('call');
+        sid = call.sid;
+        status = call.status;
+        await stamp('call');
+      } catch (error) {
+        reason = friendlyTwilioError(error, 'Call');
+        status = 'failed';
+      }
     }
   }
 
@@ -48,7 +53,7 @@ export async function POST(req: Request) {
     await q('INSERT INTO activities(lead_id,type,body) VALUES($1,$2,$3)', [
       leadId,
       'call',
-      reason ? `Call blocked: ${reason}` : `Call ${status} SID ${sid}`,
+      reason ? `Call ${status === 'failed' ? 'failed' : 'blocked'}: ${reason}` : `Call ${status} SID ${sid}`,
     ]);
   }
 

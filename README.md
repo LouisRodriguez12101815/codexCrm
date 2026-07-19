@@ -29,6 +29,15 @@ Local and Docker defaults may keep Twilio disabled through `.env.example`; the l
 
 The hosted demo runs on AWS EC2 using Docker Compose with Postgres and the Next.js app. For this HTTP demo, `APP_BASE_URL` should use `http://204.236.254.26:3000`, and `COOKIE_SECURE` should remain `false`. Use `COOKIE_SECURE=true` only for HTTPS deployments.
 
+
+## Judge 90-second walkthrough
+
+1. Sign in at <http://204.236.254.26:3000/> with `demo@codexcrm.local` / `codexcrm-demo`.
+2. Open **Leads**, choose any seeded lead, and review the lead profile, notes, status, and timeline.
+3. In **SMS / Call**, confirm Twilio shows enabled on the live demo and check whether SMS or calls are ready now or cooling down.
+4. Send one compliant SMS or place one demo call to a US `+1` number; if the hourly cap, kill switch, Twilio account, or number rules block it, the timeline will show a friendly reason instead of a crash.
+5. Add a note or change status to show the CRM workflow still works even when outreach is blocked.
+
 ## Features
 
 - Demo-only cookie authentication with no public signup.
@@ -118,11 +127,11 @@ See [`docs/AWS_DEPLOY.md`](docs/AWS_DEPLOY.md) for the current EC2 + Docker Comp
 - Added Twilio safety controls, kill-switch documentation, cooldown behavior, and no-secrets guardrails.
 - Drafted AWS deployment documentation for the EC2 Docker Compose judge demo and optional managed deployment paths.
 - Ran build checks and repository hygiene checks to keep the public submission reproducible.
-- `/feedback` Session ID: `PASTE_FEEDBACK_ID`
+- `/feedback` Session ID: `[PASTE_YOUR_ID]`
 
 ## Video
 
-Demo video placeholder: `PASTE_YOUTUBE_OR_DEVPOST_VIDEO_LINK`
+Demo video placeholder: `PASTE_YOUTUBE_URL` (the only intentional submission placeholder if the final video URL is not available yet)
 
 ## Submission checklist
 
