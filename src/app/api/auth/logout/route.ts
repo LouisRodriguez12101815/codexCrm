@@ -1,1 +1,7 @@
-import { NextResponse } from 'next/server';import { clearSession } from '@/lib/auth';export async function POST(req:Request){await clearSession();return NextResponse.redirect(new URL('/',req.url));}
+import { clearSession } from '@/lib/auth';
+import { redirectTo } from '@/lib/redirect';
+
+export async function POST(req: Request) {
+  await clearSession();
+  return redirectTo(req, '/');
+}

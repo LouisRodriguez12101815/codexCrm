@@ -1,45 +1,71 @@
 # AWS deployment guide
 
-Recommended deployment: **AWS App Runner + Amazon RDS PostgreSQL**. App Runner provides managed HTTPS quickly, while RDS keeps CRM data in the AWS account.
+The live judge demo is already deployed. Do **not** recreate AWS infrastructure unless the demo is broken.
 
-## 1. Create RDS PostgreSQL
+## Current live demo: EC2 + Docker Compose
 
-- Engine: PostgreSQL
-- Instance: `db.t4g.micro` or smallest eligible free-tier/tiny instance
-- Public access: off when using VPC connector; temporarily restricted to your IP only if needed for setup
-- Database name: `codexcrm`
-- Store username/password in AWS Secrets Manager or SSM Parameter Store
+- URL: http://204.236.254.26:3000/
+- Login: `demo@codexcrm.local` / `codexcrm-demo`
+- Region: `us-east-1`
+- EC2 tag: `Name=codexcrm-demo`
+- Runtime: Docker Compose with Postgres and Next.js
+- Public app port: `3000`
 
-## 2. Configure App Runner
-
-1. Connect the GitHub repository.
-2. Runtime: Node.js.
-3. Build command: `npm ci && npm run build`.
-4. Start command: `npm run start`.
-5. Port: `3000`.
-6. Add environment variables from `.env.example`.
-7. Set `PGSSLMODE=require` for RDS TLS.
-8. Attach a VPC connector that can reach RDS.
-
-## 3. Initialize database
-
-Run a one-off task from a trusted machine or AWS CloudShell with the production `DATABASE_URL`:
+Recommended environment values for the HTTP EC2 demo:
 
 ```bash
-npm ci
-npm run db:setup
-npm run db:seed
+APP_BASE_URL=http://204.236.254.26:3000
+COOKIE_SECURE=false
+DATABASE_URL=postgres://postgres:postgres@postgres:5432/codexcrm
+DEMO_EMAIL=demo@codexcrm.local
+DEMO_PASSWORD=codexcrm-demo
+DEMO_SESSION_SECRET=<strong-random-value-kept-out-of-git>
+TWILIO_ENABLED=false
+SMS_ENABLED=false
+CALLS_ENABLED=false
+PGSSLMODE=disable
 ```
 
-## 4. Twilio production demo settings
+`APP_BASE_URL` keeps redirects pointed at the public host instead of an internal Docker hostname. `COOKIE_SECURE=false` keeps demo auth working over the current HTTP URL. If the demo is moved behind HTTPS, set `APP_BASE_URL` to the HTTPS origin and `COOKIE_SECURE=true`.
 
-- Set `TWILIO_ENABLED=true` only during demos.
-- Set `SMS_ENABLED=true` and `CALLS_ENABLED=true` only if the purchased US Twilio number is verified/ready.
-- Keep the app-level one-hour SMS and call cooldowns enabled.
-- Use no real customer PII for Devpost judging.
+## Update the EC2 demo after merging
 
-## 5. Cost controls
+From the app directory on the instance:
 
-- Use the smallest RDS instance and stop/delete it after judging if not needed.
-- Keep App Runner min instances at the lowest setting.
-- Disable Twilio kill switches outside demos.
+```bash
+git pull origin main
+docker compose up --build -d
+```
+
+If the database volume already exists, the app command can safely run schema setup and sample seeding again.
+
+## Local Docker Compose smoke test
+
+```bash
+docker compose up --build
+```
+
+Then open <http://localhost:3000/> and log in with the shared demo account.
+
+## Twilio demo controls
+
+- Keep `TWILIO_ENABLED=false` unless actively demonstrating Twilio.
+- Enable `SMS_ENABLED=true` and/or `CALLS_ENABLED=true` only for opted-in/test recipients.
+- Never commit `TWILIO_AUTH_TOKEN`, AWS keys, database passwords, `.env`, `.env.aws`, or PEM files.
+- The app still enforces US-only phone numbers, prohibited-content filtering, attempt logging, and one-hour shared cooldowns.
+
+## Optional future path: AWS App Runner + RDS
+
+App Runner provides managed HTTPS quickly, while RDS keeps CRM data in the AWS account.
+
+1. Create Amazon RDS PostgreSQL with a private endpoint where possible.
+2. Store database and demo secrets in AWS Secrets Manager or SSM Parameter Store.
+3. Configure App Runner from this GitHub repo:
+   - Build command: `npm ci && npm run build`
+   - Start command: `npm run start`
+   - Port: `3000`
+   - Environment values from `.env.example`
+   - `APP_BASE_URL=https://<app-runner-url>`
+   - `COOKIE_SECURE=true`
+   - `PGSSLMODE=require` for RDS TLS
+4. Run `npm run db:setup` and `npm run db:seed` once with the production `DATABASE_URL`.
