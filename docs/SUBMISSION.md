@@ -6,9 +6,18 @@
 - Live demo URL: http://204.236.254.26:3000/
 - Shared login: `demo@codexcrm.local` / `codexcrm-demo`
 - Track: Work and productivity
-- Video: `PASTE_YOUTUBE_OR_DEVPOST_VIDEO_LINK`
-- `/feedback` Session ID: `PASTE_FEEDBACK_ID`
+- Video: `PASTE_YOUTUBE_URL`
+- `/feedback` Session ID: `[PASTE_YOUR_ID]`
 - License: MIT
+
+
+## Judge 90-second walkthrough
+
+1. Log in to http://204.236.254.26:3000/ with `demo@codexcrm.local` / `codexcrm-demo`.
+2. Open a seeded lead from the lead list.
+3. Read the Twilio status panel: the live demo has Twilio enabled, with separate SMS and call cooldown messages.
+4. Try one compliant SMS or demo call to a US `+1` number. The shared demo allows 1 SMS and 1 call per hour; blocked, cooled-down, or Twilio-side failures are saved to the timeline with judge-friendly reasons.
+5. Add a note or change lead status to verify the core CRM path.
 
 ## Live deployment notes
 
@@ -30,7 +39,6 @@
 
 ## Human before final Devpost submit
 
-1. Paste the real `/feedback` Session ID in `README.md` and this checklist.
-2. Paste the final demo video link in `README.md` and this checklist.
-3. Confirm the live EC2 URL is still reachable.
-4. Keep all real Twilio, AWS, and database credentials outside git.
+1. Paste the final demo video link in `README.md` and this checklist if it is available before submission.
+2. Confirm the live EC2 URL is still reachable.
+3. Keep all real Twilio, AWS, and database credentials outside git.
