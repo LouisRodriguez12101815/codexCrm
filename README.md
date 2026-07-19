@@ -1,14 +1,33 @@
 # CodexCRM
 
+## Live judge demo (Work and productivity)
+
+- **Live demo:** <http://204.236.254.26:3000/>
+- **Email:** `demo@codexcrm.local`
+- **Password:** `codexcrm-demo`
+- **Track:** Work and productivity
+
 CodexCRM is a hackathon SDR workspace for OpenAI Build Week's **Work and productivity** track. It gives sales teams a small CRM with lead tracking, notes, demo-safe Twilio outreach controls, sample data, and an AWS-hosted judge demo.
+
+## Current hosted demo status
+
+The hosted AWS demo currently has **Twilio SMS and outbound calls enabled for judging**. This is intentional for the hackathon demo, but usage is tightly capped to limit Twilio spend and keep the shared environment safe:
+
+- **1 outbound SMS per hour** for the shared demo scope.
+- **1 outbound call per hour** for the shared demo scope.
+- **US `+1` E.164 numbers only**.
+- Server-side content filtering blocks prohibited outreach content.
+- Twilio kill switches remain available through `TWILIO_ENABLED`, `SMS_ENABLED`, and `CALLS_ENABLED`.
+
+Local and Docker defaults may keep Twilio disabled through `.env.example`; the live judge demo intentionally differs so reviewers can test SMS and calls under the caps above.
 
 ## Open the live demo in under 1 minute
 
-- Live demo: <http://204.236.254.26:3000/>
-- Email: `demo@codexcrm.local`
-- Password: `codexcrm-demo`
+1. Go to <http://204.236.254.26:3000/>.
+2. Sign in with `demo@codexcrm.local`.
+3. Use password `codexcrm-demo`.
 
-The hosted demo runs on AWS EC2 using Docker Compose with Postgres and the Next.js app. Twilio kill switches are off by default unless explicitly enabled for a controlled demo.
+The hosted demo runs on AWS EC2 using Docker Compose with Postgres and the Next.js app. For this HTTP demo, `APP_BASE_URL` should use `http://204.236.254.26:3000`, and `COOKIE_SECURE` should remain `false`. Use `COOKIE_SECURE=true` only for HTTPS deployments.
 
 ## Features
 
@@ -62,7 +81,7 @@ Copy `.env.example` to `.env` for local development. Important values:
 - `APP_BASE_URL`: Optional public base URL for redirects, for example `http://204.236.254.26:3000` or `https://your-domain.example`.
 - `COOKIE_SECURE`: Set `true` for HTTPS deployments. Leave `false` for the HTTP judge demo.
 - `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_SESSION_SECRET`: Shared demo login and signed demo session value.
-- `TWILIO_ENABLED`, `SMS_ENABLED`, `CALLS_ENABLED`: Kill switches. Keep disabled unless running a controlled Twilio demo.
+- `TWILIO_ENABLED`, `SMS_ENABLED`, `CALLS_ENABLED`: Kill switches. Local and Docker defaults may be disabled in `.env.example`; the hosted AWS judge demo currently enables SMS and calls with the hard caps documented above.
 
 Do **not** commit `.env`, `.env.aws`, PEM files, Twilio tokens, AWS keys, or production database credentials.
 
